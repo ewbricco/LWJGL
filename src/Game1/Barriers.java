@@ -315,7 +315,19 @@ public class Barriers {
             direction = Direction.EAST;
         }
 
-        else if(action == GLFW_RELEASE && (key == GLFW_KEY_W || key == GLFW_KEY_A || key == GLFW_KEY_S || key == GLFW_KEY_D )){
+        else if(action == GLFW_RELEASE && key == GLFW_KEY_W && direction == Direction.NORTH){
+            direction = null;
+        }
+
+        else if(action == GLFW_RELEASE && key == GLFW_KEY_S && direction == Direction.SOUTH){
+            direction = null;
+        }
+
+        else if(action == GLFW_RELEASE && key == GLFW_KEY_D && direction == Direction.EAST){
+            direction = null;
+        }
+
+        else if(action == GLFW_RELEASE && key == GLFW_KEY_A && direction == Direction.WEST){
             direction = null;
         }
 
@@ -340,15 +352,15 @@ public class Barriers {
             uncalculatedSouth += MOVEMENTDISTANCE;
         }
         else if(direction == Direction.WEST){
+            int adj = collisionAdjustment(Direction.WEST, Main1.mc.getX(), Main1.mc.getY(), Main1.mc.getSize());
             for(int i=0; i<posX.size(); i++){
-                int adj = collisionAdjustment(Direction.WEST, Main1.mc.getX(), Main1.mc.getY(), Main1.mc.getSize());
                 posX.set(i, posX.get(i) + MOVEMENTDISTANCE - adj);
             }
             uncalculatedWest += MOVEMENTDISTANCE;
         }
         else if(direction == Direction.EAST){
+            int adj = collisionAdjustment(Direction.EAST, Main1.mc.getX(), Main1.mc.getY(), Main1.mc.getSize());
             for(int i=0; i<posX.size(); i++){
-                int adj = collisionAdjustment(Direction.EAST, Main1.mc.getX(), Main1.mc.getY(), Main1.mc.getSize());
                 posX.set(i, posX.get(i) - MOVEMENTDISTANCE + adj);
             }
             uncalculatedEast += MOVEMENTDISTANCE;
@@ -360,85 +372,66 @@ public class Barriers {
     * note: assumes that object can only collide with one shape
      */
     private int collisionAdjustment(Direction d, int x, int y, int s){
-        int diff;
-        boolean diffInRange;
-        boolean otherAxisAligned;
+        //boolean diffInRange;
+        //boolean otherAxisAligned;
+        boolean axisAligned1;
+        boolean axisAligned2;
+
+        int diff = 0, top, bottom, left, right;
+
         if(d == Direction.NORTH){
-            for(int i=0; i<posX.size(); i++){
-                diffInRange = ((y+s+MOVEMENTDISTANCE) > (posY.get(i) - size.get(i)) && (y+s+MOVEMENTDISTANCE) < (posY.get(i) + size.get(i)))
-                        || ((y-s+MOVEMENTDISTANCE) > (posY.get(i) - size.get(i)) && (y-s+MOVEMENTDISTANCE) < (posY.get(i) + size.get(i)));
-                if(diffInRange) {
-                    //System.out.println("diffInRange for shape with x value " + posX.get(i) + " and y value " + posY.get(i));
-                }
-                otherAxisAligned = ((x+s) > (posX.get(i) - size.get(i)) && (x+s) < (posX.get(i) + size.get(i)))
-                        || ((x-s) > (posX.get(i) - size.get(i)) && (x-s) < (posX.get(i) + size.get(i)));
-                if(otherAxisAligned){
-                    //System.out.println("otherAxisAligned for shape with x value " + posX.get(i) + " and y value " + posY.get(i));
-                }
-                if(diffInRange && otherAxisAligned){
-                    diff = (y+s+MOVEMENTDISTANCE) - (posY.get(i) - size.get(i));
-                    //System.out.println("Returning adjustment of " + diff);
-                    return diff;
-                }
-            }
+            top = y + s + MOVEMENTDISTANCE;
+            bottom = y - s + MOVEMENTDISTANCE;
+            left = x - s;
+            right = x + s;
         }
         else if(d == Direction.SOUTH){
-            for(int i=0; i<posX.size(); i++){
-                diffInRange = ((y+s-MOVEMENTDISTANCE) > (posY.get(i) - size.get(i)) && (y+s-MOVEMENTDISTANCE) < (posY.get(i) + size.get(i)))
-                        || ((y-s - MOVEMENTDISTANCE) > (posY.get(i) - size.get(i)) && (y-s - MOVEMENTDISTANCE) < (posY.get(i) + size.get(i)));
-                if(diffInRange) {
-                    System.out.println("diffInRange for shape with x value " + posX.get(i) + " and y value " + posY.get(i));
-                }
-                otherAxisAligned = ((x+s) > (posX.get(i) - size.get(i)) && (x+s) < (posX.get(i) + size.get(i)))
-                        || ((x-s) > (posX.get(i) - size.get(i)) && (x-s) < (posX.get(i) + size.get(i)));
-                if(otherAxisAligned){
-                    System.out.println("otherAxisAligned for shape with x value " + posX.get(i) + " and y value " + posY.get(i));
-                }
-                if(diffInRange && otherAxisAligned){
-                    diff =  (posY.get(i) + size.get(i)) - (y-s-MOVEMENTDISTANCE);
-                    System.out.println("Returning adjustment of " + diff);
-                    return diff;
-                }
-            }
+            top = y + s - MOVEMENTDISTANCE;
+            bottom = y - s - MOVEMENTDISTANCE;
+            left = x - s;
+            right = x + s;
         }
         else if(d == Direction.WEST){
-            for(int i=0; i<posX.size(); i++){
-                diffInRange = ((x+s-MOVEMENTDISTANCE) > (posX.get(i) - size.get(i)) && (x+s-MOVEMENTDISTANCE) < (posX.get(i) + size.get(i)))
-                        || ((x-s-MOVEMENTDISTANCE) > (posX.get(i) - size.get(i)) && (x-s-MOVEMENTDISTANCE) < (posX.get(i) + size.get(i)));
-                if(diffInRange) {
-                    System.out.println("diffInRange for shape with x value " + posX.get(i) + " and y value " + posY.get(i));
-                }
-                otherAxisAligned = ((y+s) > (posY.get(i) - size.get(i)) && (y+s) < (posY.get(i) + size.get(i)))
-                        || ((y-s) > (posY.get(i) - size.get(i)) && (y-s) < (posY.get(i) + size.get(i)));
-                if(otherAxisAligned){
-                    System.out.println("otherAxisAligned for shape with x value " + posX.get(i) + " and y value " + posY.get(i));
-                }
-                if(diffInRange && otherAxisAligned){
-                    diff =  (posX.get(i) + size.get(i)) - (x-s-MOVEMENTDISTANCE);
-                    System.out.println("Returning adjustment of " + diff);
-                    return diff;
-                }
-            }
+            top = y + s;
+            bottom = y - s;
+            left = x - s - MOVEMENTDISTANCE;
+            right = x + s - MOVEMENTDISTANCE;
         }
         else if(d == Direction.EAST){
-            for(int i=0; i<posX.size(); i++){
-                diffInRange = ((x+s+MOVEMENTDISTANCE) > (posX.get(i) - size.get(i)) && (x+s+MOVEMENTDISTANCE) < (posX.get(i) + size.get(i)))
-                        || ((x-s+MOVEMENTDISTANCE) > (posX.get(i) - size.get(i)) && (x-s+MOVEMENTDISTANCE) < (posX.get(i) + size.get(i)));
-                if(diffInRange) {
-                    System.out.println("diffInRange for shape with x value " + posX.get(i) + " and y value " + posY.get(i));
+            top = y + s;
+            bottom = y - s;
+            left = x - s + MOVEMENTDISTANCE;
+            right = x + s + MOVEMENTDISTANCE;
+        }
+        else{
+            return 0;
+        }
+
+        for(int i=0; i<posX.size(); i++){
+            axisAligned1 = (top > (posY.get(i) - size.get(i)) && top < (posY.get(i) + size.get(i)))
+                    || (bottom > (posY.get(i) - size.get(i)) && bottom < (posY.get(i) + size.get(i)))
+                    || (top > (posY.get(i) - size.get(i)) && bottom < (posY.get(i) + size.get(i)));
+
+            axisAligned2 = (right > (posX.get(i) - size.get(i)) && right < (posX.get(i) + size.get(i)))
+                    || (left > (posX.get(i) - size.get(i)) && left < (posX.get(i) + size.get(i)))
+                    || (right > (posX.get(i) - size.get(i)) && left < (posX.get(i) + size.get(i)));
+            if(axisAligned1 && axisAligned2){
+                if(d == Direction.NORTH) {
+                    diff = top - (posY.get(i) - size.get(i));
                 }
-                otherAxisAligned = ((y+s) > (posY.get(i) - size.get(i)) && (y+s) < (posY.get(i) + size.get(i)))
-                        || ((y-s) > (posY.get(i) - size.get(i)) && (y-s) < (posY.get(i) + size.get(i)));
-                if(otherAxisAligned){
-                    System.out.println("otherAxisAligned for shape with x value " + posX.get(i) + " and y value " + posY.get(i));
+                else if(d == Direction.SOUTH){
+                    diff =  (posY.get(i) + size.get(i)) - bottom;
                 }
-                if(diffInRange && otherAxisAligned){
-                    diff =  (x+s+MOVEMENTDISTANCE) - (posX.get(i) - size.get(i));
-                    System.out.println("Returning adjustment of " + diff);
-                    return diff;
+                else if(d == Direction.WEST){
+                    diff =  (posX.get(i) + size.get(i)) - left;
                 }
+                else if(d == Direction.EAST){
+                    diff =  right - (posX.get(i) - size.get(i));
+                }
+                return diff;
             }
         }
+
         return 0;
     }
 
